@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-//	"io/ioutil"
 	"net/http"
 	"encoding/json"
 )
@@ -17,6 +16,7 @@ var endpoints = map[string]string {
 }
 const cacheFile = "caches/%s.json"
 
+// TODO: move to another file, rename to make the passthrough more obvious
 type FileWriter struct {
 	reader io.Reader
 	cacheName string
@@ -41,7 +41,7 @@ func (fw *FileWriter) Read(out []byte) (i int, e error) {
 }
 
 // variables
-var cache = map[string]map[string]interface{}{}
+var cache = map[string]interface{}{}
 
 func ensureCacheDir() {
 	err := os.Mkdir("caches", 0700)
@@ -58,7 +58,7 @@ func refreshCache(name, url string) error {
 		return err
 	}
 	defer r.Body.Close()
-	var out map[string]interface{}
+	var out DrugReply
 	fwriter := &FileWriter{reader:r.Body, cacheName: name}
 	defer fwriter.file.Close()
 	out, err = decode(fwriter)
@@ -69,8 +69,15 @@ func refreshCache(name, url string) error {
 	return nil
 }
 
-func decode(reader io.Reader) (out map[string]interface{}, err error) {
+func decode(reader io.Reader) (out DrugReply, err error) {
 	err = json.NewDecoder(reader).Decode(&out)
+	drug := "heroin"
+	fmt.Println(out.Data[0][drug].PrettyName)
+	fmt.Println(out.Data[0][drug].Onset)
+	fmt.Println(out.Data[0][drug].Categories)
+	fmt.Println(out.Data[0][drug].Duration)
+	fmt.Println(out.Data[0][drug].Dose)
+	fmt.Println(out.Data[0][drug].Aftereffects)
 	return out, err
 }
 
@@ -93,6 +100,7 @@ func loadFromFile(fname, name string) (err error) {
 }
 
 func checkCaches() error {
+	ensureCacheDir()
 	for name := range endpoints {
 		// Check RAM, file before triggering refresh
 		if cache[name] != nil {
@@ -107,7 +115,7 @@ func checkCaches() error {
 		}
 		if err != nil {
 			// Blocking cache refresh, no cache available
-//			fmt.Printf("Couldn't find or load %s, refreshing all\n", name)
+			fmt.Printf("Couldn't find or load %s because %s refreshing all\n", name, err)
 			refreshCaches()
 			break
 		}
@@ -120,5 +128,5 @@ func Get() string {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to fetch drugs: %s", err))
 	}
-	return "hey"
+	return ""
 }
