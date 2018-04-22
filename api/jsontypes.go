@@ -18,7 +18,18 @@ type Drug struct {
 	Aftereffects FormattedItem `json:"formatted_aftereffects"`
 }
 
+var drugFields = []string {"effects", "onset", "duration", "dose", "aftereffects", "after-effects", "aliases", "categories"}
+
 type DrugReply struct {
 	Err string
 	Data []map[string]Drug
+}
+
+func (d *Drug) FormattedField(field string) bool {
+	for _, x := range drugFields {
+		if x == field {
+			return true
+		}
+	}
+	return false
 }

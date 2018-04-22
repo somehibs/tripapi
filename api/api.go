@@ -51,6 +51,14 @@ func ensureCacheDir() {
 	}
 }
 
+type simpleError struct {
+	msg string
+}
+
+func (se simpleError) Error() string {
+	return fmt.Sprintf("Error during json reading: %s", se.msg)
+}
+
 func refreshCache(name, url string) error {
 	var client = &http.Client{Timeout: 10 * time.Second}
 	r, err := client.Get(baseUrl+url)
@@ -65,25 +73,30 @@ func refreshCache(name, url string) error {
 	if err != nil {
 		return err
 	}
-	cache[name] = out
+	if len(out.Err) > 0 {
+		return simpleError{msg: out.Err}
+	}
+	cache[name] = out.Data[0]
 	return nil
 }
 
 func decode(reader io.Reader) (out DrugReply, err error) {
 	err = json.NewDecoder(reader).Decode(&out)
-	drug := "heroin"
-	fmt.Println(out.Data[0][drug].PrettyName)
-	fmt.Println(out.Data[0][drug].Onset)
-	fmt.Println(out.Data[0][drug].Categories)
-	fmt.Println(out.Data[0][drug].Duration)
-	fmt.Println(out.Data[0][drug].Dose)
-	fmt.Println(out.Data[0][drug].Aftereffects)
 	return out, err
+}
+
+func prettyTest(cacheName, drug string) {
+	data := cache[cacheName].(DrugReply).Data[0]
+	drugItem := data[drug]
+	fmt.Printf("%+v\n\n", drugItem)
 }
 
 func refreshCaches() error {
 	for name, url := range endpoints {
-		refreshCache(name, url)
+		err := refreshCache(name, url)
+		if err != nil {
+			return err
+		}
 	}
 	fmt.Printf("Hey, I found %d caches\r\n", len(cache))
 	return nil
@@ -116,8 +129,7 @@ func checkCaches() error {
 		if err != nil {
 			// Blocking cache refresh, no cache available
 			fmt.Printf("Couldn't find or load %s because %s refreshing all\n", name, err)
-			refreshCaches()
-			break
+			return refreshCaches()
 		}
 	}
 	return nil
@@ -128,5 +140,12 @@ func Get() string {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to fetch drugs: %s", err))
 	}
+	name := "alldrugs"
+	drugItem := cache[name].(DrugReply).Data[0]["mdma"]
+	fmt.Printf("Onset is a formatted field %s\n", drugItem.FormattedField("onset"))
+	fmt.Printf("Marquis is a formatted field %s\n", drugItem.FormattedField("marquis"))
+	prettyTest(name, "heroin")
+	prettyTest(name, "dxm")
+	prettyTest(name, "mdma")
 	return ""
 }
