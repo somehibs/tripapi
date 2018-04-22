@@ -25,6 +25,24 @@ type DrugReply struct {
 	Data []map[string]Drug
 }
 
+func (d *Drug) PrintProperties() []string {
+	props := []string{}
+	for k, v := range d.Properties {
+		if d.FormattedField(k) {
+			continue
+		}
+		s := "unknown value"
+		switch un := v.(type) {
+			case string:
+				s = un
+			default:
+				s = "unknown value"
+		}
+		props = append(props, ("k: " + k + " v: " + s))
+	}
+	return props
+}
+
 func (d *Drug) FormattedField(field string) bool {
 	for _, x := range drugFields {
 		if x == field {

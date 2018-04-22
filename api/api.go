@@ -89,6 +89,8 @@ func prettyTest(cacheName, drug string) {
 	data := cache[cacheName].(DrugReply).Data[0]
 	drugItem := data[drug]
 	fmt.Printf("%+v\n\n", drugItem)
+	fmt.Println(drugItem.PrintProperties())
+	fmt.Println("\n")
 }
 
 func refreshCaches() error {
