@@ -1,10 +1,11 @@
 package tripapi
 
 import (
-	"io"
-	"io/ioutil"
-	"fmt"
 	"time"
+	"fmt"
+	"io"
+	"os"
+	"io/ioutil"
 	"net/http"
 	"encoding/json"
 )
@@ -15,10 +16,6 @@ var endpoints = map[string]string {
 	"alldrugs": "api/tripsit/getAllDrugs",
 }
 
-// variables
-var client = &http.Client{Timeout: 10 * time.Second}
-var cache = map[string]map[string]interface{}{}
-
 type FileWriter struct {
 	reader io.Reader
 	cacheName string
@@ -26,10 +23,27 @@ type FileWriter struct {
 
 func (fw *FileWriter) Read(out []byte) (i int, e error) {
 	i, e = fw.reader.Read(out)
+	if i > 0 {
+		ioutil.WriteFile(fw.cacheName+".json", out[:i], 0600)
+	}
+	fmt.Println(string(out[:i]))
 	return
 }
 
+// variables
+var cache = map[string]map[string]interface{}{}
+
+func ensureCacheDir() {
+	err := os.Mkdir("caches", 0600)
+	if err != nil && !os.IsExist(err) {
+		fmt.Println(err)
+		panic("Cannot ensure cache directory - are your permissions ok? ")
+	}
+}
+
 func refreshCaches() error {
+	ensureCacheDir()
+	var client = &http.Client{Timeout: 10 * time.Second}
 	for name, url := range endpoints {
 		r, err := client.Get(baseUrl+url)
 		if err != nil {
