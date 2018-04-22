@@ -24,9 +24,8 @@ type FileWriter struct {
 func (fw *FileWriter) Read(out []byte) (i int, e error) {
 	i, e = fw.reader.Read(out)
 	if i > 0 {
-		ioutil.WriteFile(fw.cacheName+".json", out[:i], 0600)
+		ioutil.WriteFile("caches/"+fw.cacheName+".json", out[:i], 0600)
 	}
-	fmt.Println(string(out[:i]))
 	return
 }
 
