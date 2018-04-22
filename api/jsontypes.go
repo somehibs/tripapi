@@ -20,9 +20,11 @@ type Drug struct {
 
 var drugFields = []string {"effects", "onset", "duration", "dose", "aftereffects", "after-effects", "aliases", "categories"}
 
+type DrugData map[string]Drug
+
 type DrugReply struct {
 	Err string
-	Data []map[string]Drug
+	Data []DrugData
 }
 
 func (d *Drug) StringProperties() map[string]string {
