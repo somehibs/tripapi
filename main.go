@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/somehibs/tripapi/api"
+	"github.com/somehibs/tripapi/tripapi"
 )
 
 func main() {
-	fmt.Println(tripapi.Get())
+	fmt.Println(tripapi.Test())
 }

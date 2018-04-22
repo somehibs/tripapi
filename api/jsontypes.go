@@ -25,20 +25,15 @@ type DrugReply struct {
 	Data []map[string]Drug
 }
 
-func (d *Drug) PrintProperties() []string {
-	props := []string{}
+func (d *Drug) StringProperties() map[string]string {
+	props := map[string]string {}
 	for k, v := range d.Properties {
 		if d.FormattedField(k) {
 			continue
 		}
-		s := "unknown value"
-		switch un := v.(type) {
-			case string:
-				s = un
-			default:
-				s = "unknown value"
+		if len(v.(string)) != 0 {
+			props[k] = v.(string)
 		}
-		props = append(props, ("k: " + k + " v: " + s))
 	}
 	return props
 }
