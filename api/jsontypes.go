@@ -27,6 +27,18 @@ type DrugReply struct {
 	Data []DrugData
 }
 
+func (d Drug) Fields() *map[string]string {
+	return nil
+}
+
+func (d Drug) TableFields() map[string]map[string]string {
+	return nil
+}
+
+func (d Drug) ComplexFields() *map[string]map[string]string {
+	return nil
+}
+
 func (d *Drug) StringProperties() map[string]string {
 	props := map[string]string {}
 	for k, v := range d.Properties {
