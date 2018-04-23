@@ -111,6 +111,8 @@ func checkCaches() error {
 			err = refreshCaches()
 			if err != nil {
 				panic(fmt.Sprintf("Failed to fetch drugs: %s", err))
+			} else {
+				return nil
 			}
 		}
 	}
