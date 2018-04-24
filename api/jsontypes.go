@@ -31,7 +31,7 @@ func (d Drug) Fields() *map[string]string {
 	return nil
 }
 
-func (d Drug) TableFields() map[string]map[string]string {
+func (d Drug) TableFields() *map[string]map[string]string {
 	return nil
 }
 
