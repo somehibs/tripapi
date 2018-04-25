@@ -27,18 +27,28 @@ type DrugReply struct {
 	Data []DrugData
 }
 
-func addAll(m1 *map[string]string, m2 *FormattedItem) {
-	for x, y := range *m2 {
-		(*m1)[x] = y
+
+func addAll(m1 *map[string]string, m2 *FormattedItem, name string) {
+	str := ""
+	if (*m2)["value"] != "" {
+		(*m1)[name] = (*m2)["value"] + " " + (*m2)["_unit"]
+		return
 	}
+	for x, y := range *m2 {
+		str = str + " " + x + " " + y
+	}
+	(*m1)[name] = str
 }
 
 func (d Drug) Fields() *map[string]string {
 	p := d.StringProperties()
+	if d.DoseNote != "" {
+		p["dose note"] = d.DoseNote
+	}
 	sp := &p
-	addAll(sp, &d.Onset)
-	addAll(sp, &d.Duration)
-	addAll(sp, &d.Aftereffects)
+	addAll(sp, &d.Onset, "onset")
+	addAll(sp, &d.Duration, "duration")
+	addAll(sp, &d.Aftereffects, "after-effects")
 	return sp
 }
 
@@ -48,7 +58,7 @@ func (d Drug) TableFields() *map[string]map[string]string {
 }
 
 func (d Drug) ComplexFields() *map[string]map[string]string {
-return nil
+	return nil
 }
 
 func (d *Drug) StringProperties() map[string]string {
