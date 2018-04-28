@@ -52,9 +52,11 @@ func (d Drug) Fields() *map[string]string {
 	return sp
 }
 
-func (d Drug) TableFields() *map[string]map[string]string {
+func (d Drug) TableFields() *map[string]map[string]map[string]string {
 	cast := (map[string]map[string]string(d.Dose))
-	return &cast
+	ret := map[string]map[string]map[string]string{}
+	ret["dose"] = cast
+	return &ret
 }
 
 func (d Drug) ComplexFields() *map[string]map[string]string {
