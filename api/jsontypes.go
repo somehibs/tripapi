@@ -18,7 +18,7 @@ type Drug struct {
 	Aftereffects FormattedItem `json:"formatted_aftereffects"`
 }
 
-var drugFields = []string {"effects", "onset", "duration", "dose", "aftereffects", "after-effects", "aliases", "categories"}
+var drugFields = []string {"effects", "onset", "dose", "aftereffects", "after-effects", "aliases", "categories"}
 
 type DrugData map[string]Drug
 
@@ -34,10 +34,18 @@ func addAll(m1 *map[string]string, m2 *FormattedItem, name string) {
 		(*m1)[name] = (*m2)["value"] + " " + (*m2)["_unit"]
 		return
 	}
+	unit := (*m2)["_unit"]
 	for x, y := range *m2 {
-		str = str + " " + x + " " + y
+		if x == "_unit" {
+			continue
+		}
+		str = str + " `" + x + "` " + y + " " + unit
 	}
 	(*m1)[name] = str
+}
+
+func trim(s string) string {
+	return s[:len(s)-2]
 }
 
 func (d Drug) Fields() *map[string]string {
@@ -46,6 +54,7 @@ func (d Drug) Fields() *map[string]string {
 		p["dose note"] = d.DoseNote
 	}
 	sp := &p
+	p["factsheet"] = "https://drugs.tripsit.me/" + d.PrettyName
 	addAll(sp, &d.Onset, "onset")
 	addAll(sp, &d.Duration, "duration")
 	addAll(sp, &d.Aftereffects, "after-effects")
@@ -55,12 +64,13 @@ func (d Drug) Fields() *map[string]string {
 func (d Drug) TableFields() *map[string]map[string]map[string]string {
 	cast := (map[string]map[string]string(d.Dose))
 	ret := map[string]map[string]map[string]string{}
-	ret["dose"] = cast
+	ret["Dose"] = cast
 	return &ret
 }
 
-func (d Drug) ComplexFields() *map[string]map[string]string {
-	return nil
+func (d Drug) MultipleFields() *map[string][]string {
+	a := map[string][]string {"effects": d.Effects, "categories": d.Categories}
+	return &a
 }
 
 func (d *Drug) StringProperties() map[string]string {
